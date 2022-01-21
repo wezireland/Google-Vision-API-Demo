@@ -42,22 +42,21 @@
 
 	<script>
 
-		// Need to first get an access token
-		if (!document.location.href.includes('access_token')) {
-			let client_id = '698194101046-blr04m4mlf07mb434k9c7h09mtmii4bc.apps.googleusercontent.com';
-			document.location.href = [`https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}`,
-			`redirect_uri=${window.location.href}`,
-				`response_type=id_token token`,
-				`scope=openid https://www.googleapis.com/auth/cloud-vision`,
-			`nonce=${Math.random().toString()}`].join('&');
-
-		}
+		//// Need to first get an access token
+		// if (!document.location.href.includes('access_token')) {
+		// 	let client_id = '698194101046-blr04m4mlf07mb434k9c7h09mtmii4bc.apps.googleusercontent.com';
+		// 	document.location.href = [`https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}`,
+		// 	`redirect_uri=${window.location.href}`,
+		// 		`response_type=id_token token`,
+		// 		`scope=openid https://www.googleapis.com/auth/cloud-vision`,
+		// 	`nonce=${Math.random().toString()}`].join('&');
+		// }
 
 		// If we are here, we have the access token, parse it out and store in variable 
-		var matches = document.location.href.match(/(.*)\#access_token\=(.*?)\&/);
-		var app_url = matches[1];
-		var token = matches[2];
-		console.log(token);
+		// var matches = document.location.href.match(/(.*)\#access_token\=(.*?)\&/);
+		// var app_url = matches[1];
+		// var token = matches[2];
+		// console.log(token);
 
 		// hide the token from the URL
 		history.pushState({}, '', window.location.href.substr(0, window.location.href.search("#")));
@@ -88,17 +87,22 @@
 			var dataUrl = canvas.toDataURL();
 
 			// Send image to google to analyze
-			fetch('https://vision.googleapis.com/v1/images:annotate', {
+			// fetch('https://vision.googleapis.com/v1/images:annotate', {
+			fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDG0b_9gKVHsLgQ8dvqGPnSHSUWyfY-acA', {
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${token}`,
+					// 'Authorization': `Bearer ${token}`,
+					'Authorization': `Basic`,
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
 					requests: [
 						{
 							features: {
-								type: 'LABEL_DETECTION'
+								type: 'DOCUMENT_TEXT_DETECTION'
+							},
+							"imageContext": {
+								"languageHints": ["en-t-i0-handwrit"]
 							},
 							image: {
 								// have to extract only the image data from dataURL
@@ -113,16 +117,16 @@
 				// Simply output the response
 				console.log(json);
 				results.innerHTML = '';
-				json.responses[0].labelAnnotations.forEach(annotation => {
+				json.responses[0].textAnnotations.forEach(annotation => {
 					let description = document.createElement('span');
-					let score = document.createElement('span');
+					// let score = document.createElement('span');
 
 					let div = document.createElement('div');
 					description.innerText = annotation.description;
-					score.innerText = annotation.score;
+					// score.innerText = annotation.score;
 
-					div.append(description, score);
-
+					// div.append(description, score);
+					div.append(description);
 					results.append(div);
 				});
 			});
